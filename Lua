@@ -1,0 +1,50 @@
+-- โหลด UI ของ Rayfield
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- สร้างหน้าต่าง UI
+local Window = Rayfield:CreateWindow({
+   Name = "Lucky Block Hub",
+   LoadingTitle = "กำลังโหลด UI...",
+   LoadingSubtitle = "Auto Spawn",
+   ConfigurationSaving = {
+      Enabled = false,
+   }
+})
+
+-- สร้างหน้าเมนูหลัก
+local Tab = Window:CreateTab("เมนูหลัก")
+
+-- กำหนดตัวแปรสถานะ
+getgenv().autoSpawn = false
+
+-- สร้างปุ่ม เปิด-ปิด (Toggle)
+Tab:CreateToggle({
+   Name = "เปิด-ปิด ออโต้เสก Lucky Block",
+   CurrentValue = false,
+   Flag = "ToggleSpawn", 
+   Callback = function(Value)
+      getgenv().autoSpawn = Value -- อัปเดตสถานะตามปุ่ม UI
+      
+      if Value then
+          -- เริ่มการทำงานเมื่อเปิด
+          task.spawn(function()
+              while getgenv().autoSpawn do
+                  -- ใช้ pcall เพื่อป้องกันสคริปต์พังถ้าหา RemoteEvent ไม่เจอชั่วคราว
+                  pcall(function()
+                      game:GetService("ReplicatedStorage"):WaitForChild("SpawnLuckyBlock"):FireServer()
+                  end)
+                  
+                  task.wait(0.1) -- หน่วงเวลา 0.1 วินาที ป้องกันเกมค้าง (ปรับให้เร็วหรือช้าลงได้)
+              end
+          end)
+      end
+   end,
+})
+
+-- แจ้งเตือนเมื่อโหลดสคริปต์เสร็จ
+Rayfield:Notify({
+   Title = "สำเร็จ!",
+   Content = "รันสคริปต์พร้อมใช้งานแล้ว",
+   Duration = 3,
+   Image = 4483362458,
+})
